@@ -1,15 +1,25 @@
-import { UseCase } from "../../../../../shared/core/UseCase"; 
-import { CreateSiteDTO } from './CreateSiteDTO'
+import { UseCase } from "../../../../../shared/core/UseCase";
+import { CreateSiteDTO } from "./CreateSiteDTO";
 import { Either, Result, left, right } from "../../../../../shared/core/Result";
+import { Site } from "../../../domain/site";
+import { SiteName } from "../../../domain/siteName";
 
-type Response = Either<
-  Result<any>,
-  Result<void>
->
+export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
+  public async execute(request: CreateSiteDTO): Promise<any> {
+    const { name } = request;
 
-export class CreateSite implements UseCase<CreateSiteDTO, Promise<Response>> {
+    const nameOrError = SiteName.create({ name });
 
-    public async execute(request: CreateSiteDTO): Promise<Response>  {
-        return left("yolo");
+    if (nameOrError.isFailure) {
+      Result.fail<Site>(nameOrError.error);
     }
+
+    const nameValue = nameOrError.getValue();
+
+    const site = Site.create({ name: nameValue });
+
+    // call repository
+
+    return null;
+  }
 }
