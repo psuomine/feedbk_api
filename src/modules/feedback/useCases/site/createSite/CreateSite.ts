@@ -18,8 +18,6 @@ export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
 
     const site = Site.create({ name: nameValue });
 
-    // call repository
-
     return null;
   }
 }
