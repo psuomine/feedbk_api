@@ -9,8 +9,8 @@ interface SiteProps {
 export type SiteCollection = Site[];
 
 export class Site extends AggregateRoot<SiteProps> {
-  get name(): SiteName {
-    return this.props.name;
+  get name(): string {
+    return this.props.name.value;
   }
 
   private constructor(props: SiteProps) {

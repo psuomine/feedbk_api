@@ -1,11 +1,14 @@
 import { UseCase } from "../../../../../shared/core/UseCase";
 import { CreateSiteDTO } from "./CreateSiteDTO";
-import { Either, Result, left, right } from "../../../../../shared/core/Result";
+import { Result } from "../../../../../shared/core/Result";
 import { Site } from "../../../domain/site";
 import { SiteName } from "../../../domain/siteName";
+import { SiteRepo } from "../../../repos/siteRepo";
+
+const siteRepo = new SiteRepo();
 
 export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
-  public async execute(request: CreateSiteDTO): Promise<any> {
+  public async execute(request: CreateSiteDTO): Promise<Result<Site>> {
     const { name } = request;
 
     const nameOrError = SiteName.create({ name });
@@ -16,8 +19,16 @@ export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
 
     const nameValue = nameOrError.getValue();
 
-    const site = Site.create({ name: nameValue });
+    const siteOrError = Site.create({ name: nameValue });
 
-    return null;
+    if (siteOrError.isFailure) {
+      return Result.fail<Site>(siteOrError.errorValue());
+    }
+
+    const site = siteOrError.getValue();
+
+    await siteRepo.save(site);
+
+    return Result.ok<Site>(site);
   }
 }
