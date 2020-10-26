@@ -1,7 +1,6 @@
 import { BaseController } from "../../../../../shared/infra/http/models/BaseController";
 import { CreateSite, CreateSiteResponse } from "./CreateSite";
 import { CreateSiteDTO } from "./CreateSiteDTO";
-import { Site } from "../../../domain/site";
 import express from "express";
 
 export class CreateSiteController extends BaseController {
