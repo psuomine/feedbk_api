@@ -1,5 +1,5 @@
 import { BaseController } from "../../../../../shared/infra/http/models/BaseController";
-import { CreateSite } from "./CreateSite";
+import { CreateSite, CreateSiteResponse } from "./CreateSite";
 import { CreateSiteDTO } from "./CreateSiteDTO";
 import { Site } from "../../../domain/site";
 import express from "express";
@@ -20,11 +20,9 @@ export class CreateSiteController extends BaseController {
 
       if (result.isFailure) {
         const error = result.errorValue();
-
-        // How to handle errors
-        return this.fail(res, "Error");
+        return this.fail(res, error);
       } else {
-        return this.ok<Site>(res, result.getValue());
+        return this.ok<CreateSiteResponse>(res, result.getValue());
       }
     } catch (err) {
       return this.fail(res, err);

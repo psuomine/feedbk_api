@@ -3,18 +3,29 @@ import { CreateSiteDTO } from "./CreateSiteDTO";
 import { Result } from "../../../../../shared/core/Result";
 import { Site } from "../../../domain/site";
 import { SiteName } from "../../../domain/siteName";
-import { SiteRepo } from "../../../repos/siteRepo";
+import { ISiteRepo } from "../../../repos/siteRepo";
 
-const siteRepo = new SiteRepo();
+export type CreateSiteResponse = {
+  id: string;
+};
 
-export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
-  public async execute(request: CreateSiteDTO): Promise<Result<Site>> {
+export class CreateSite
+  implements UseCase<CreateSiteDTO, Result<CreateSiteResponse>> {
+  private siteRepo: ISiteRepo;
+
+  constructor(siteRepo: ISiteRepo) {
+    this.siteRepo = siteRepo;
+  }
+
+  public async execute(
+    request: CreateSiteDTO
+  ): Promise<Result<CreateSiteResponse>> {
     const { name } = request;
 
     const nameOrError = SiteName.create({ name });
 
     if (nameOrError.isFailure) {
-      Result.fail<Site>(nameOrError.error);
+      return Result.fail<CreateSiteResponse>(nameOrError.errorValue());
     }
 
     const nameValue = nameOrError.getValue();
@@ -22,13 +33,13 @@ export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
     const siteOrError = Site.create({ name: nameValue });
 
     if (siteOrError.isFailure) {
-      return Result.fail<Site>(siteOrError.errorValue());
+      return Result.fail<CreateSiteResponse>(siteOrError.errorValue());
     }
 
     const site = siteOrError.getValue();
 
-    await siteRepo.save(site);
+    await this.siteRepo.save(site);
 
-    return Result.ok<Site>(site);
+    return Result.ok<CreateSiteResponse>({ id: site.id.toString() });
   }
 }
