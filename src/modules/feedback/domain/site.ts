@@ -2,22 +2,22 @@ import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
 import { Result } from "../../../shared/core/Result";
 import { SiteName } from "./siteName";
 
-interface SiteProps {
+interface ISiteProps {
   name: SiteName;
 }
 
 export type SiteCollection = Site[];
 
-export class Site extends AggregateRoot<SiteProps> {
-  get name(): SiteName {
-    return this.props.name;
+export class Site extends AggregateRoot<ISiteProps> {
+  get name(): string {
+    return this.props.name.value;
   }
 
-  private constructor(props: SiteProps) {
+  private constructor(props: ISiteProps) {
     super(props);
   }
 
-  public static create(props: SiteProps): Result<Site> {
+  public static create(props: ISiteProps): Result<Site> {
     if (props.name === null || props.name === undefined) {
       return Result.fail<Site>("Must provide a name for the site");
     }

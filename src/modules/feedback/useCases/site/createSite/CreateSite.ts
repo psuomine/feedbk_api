@@ -1,25 +1,45 @@
 import { UseCase } from "../../../../../shared/core/UseCase";
 import { CreateSiteDTO } from "./CreateSiteDTO";
-import { Either, Result, left, right } from "../../../../../shared/core/Result";
+import { Result } from "../../../../../shared/core/Result";
 import { Site } from "../../../domain/site";
 import { SiteName } from "../../../domain/siteName";
+import { ISiteRepo } from "../../../repos/siteRepo";
 
-export class CreateSite implements UseCase<CreateSiteDTO, Result<Site>> {
-  public async execute(request: CreateSiteDTO): Promise<any> {
+export type CreateSiteResponse = {
+  id: string;
+};
+
+export class CreateSite
+  implements UseCase<CreateSiteDTO, Result<CreateSiteResponse>> {
+  private siteRepo: ISiteRepo;
+
+  constructor(siteRepo: ISiteRepo) {
+    this.siteRepo = siteRepo;
+  }
+
+  public async execute(
+    request: CreateSiteDTO
+  ): Promise<Result<CreateSiteResponse>> {
     const { name } = request;
 
     const nameOrError = SiteName.create({ name });
 
     if (nameOrError.isFailure) {
-      Result.fail<Site>(nameOrError.error);
+      return Result.fail<CreateSiteResponse>(nameOrError.errorValue());
     }
 
     const nameValue = nameOrError.getValue();
 
-    const site = Site.create({ name: nameValue });
+    const siteOrError = Site.create({ name: nameValue });
 
-    // call repository
+    if (siteOrError.isFailure) {
+      return Result.fail<CreateSiteResponse>(siteOrError.errorValue());
+    }
 
-    return null;
+    const site = siteOrError.getValue();
+
+    await this.siteRepo.save(site);
+
+    return Result.ok<CreateSiteResponse>({ id: site.id.toString() });
   }
 }
